@@ -8,13 +8,13 @@ import _ from 'lodash';
 var imagesData = require('../data/imagesData.json');
 // 利用自执行函数， 将图片名信息转成图片URL路径信息
 imagesData = ((imagesDataArr) => {
-    for (let i = 0, j = imagesDataArr.length; i < j; i++) {
-        let singleImageData = imagesDataArr[i];
-        singleImageData.imageURL = require('../images/' + singleImageData.fileName);
-        imagesDataArr[i] = singleImageData;
-    }
+  for (let i = 0, j = imagesDataArr.length; i < j; i++) {
+    let singleImageData = imagesDataArr[i];
+    singleImageData.imageURL = require('../images/' + singleImageData.fileName);
+    imagesDataArr[i] = singleImageData;
+  }
 
-    return imagesDataArr;
+  return imagesDataArr;
 })(imagesData);
 
 class ImageFigure extends React.Component {
