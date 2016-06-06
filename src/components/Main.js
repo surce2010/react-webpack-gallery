@@ -18,15 +18,19 @@ imagesData = ((imagesDataArr) => {
 })(imagesData);
 
 class ImageFigure extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
   	let me = this;
   	let { props } = me;
 
     return (
     	<figure>
-			<figcaption>{_.get(props, 'imagesData.fileName')}</figcaption>
-			<img src={_.get(props, 'imagesData.imageURL')} />
-		</figure>
+        <figcaption>{_.get(props, 'imagesData.fileName')}</figcaption>
+        <img src={_.get(props, 'imagesData.imageURL')} />
+      </figure>
     );
   }
 }
@@ -39,7 +43,6 @@ class AppComponent extends React.Component {
   render() {
 
   	let imgFiguresJSX = [];
-
   	_.map(imagesData, (item) => {
   		imgFiguresJSX.push(<ImageFigure imagesData={item} />);
   	});
