@@ -38,10 +38,18 @@ class ImageFigure extends React.Component {
   render() {
   	let me = this,
         props = me.props,
-        pos = _.get(props, 'pos');
+        imgsArrangeArr = _.get(props, 'imgsArrangeArr');
+
+    let styleObj = {};
+    _.set(styleObj, 'left', _.get(imgsArrangeArr, 'pos.left'));
+    _.set(styleObj, 'top', _.get(imgsArrangeArr, 'pos.top'));
+
+    _.map(['Webkit', 'O', 'ms', 'Moz', 'Khtml'], (item) => {
+      return styleObj[item + 'Transform'] = 'rotate(' + (_.get(imgsArrangeArr, 'rotate') || 0) + 'deg)';
+    });
 
     return (
-    	<figure className="img-figure" ref={(c) => {this.figure = c}} style={pos}>
+    	<figure className="img-figure" ref={(c) => {this.figure = c}} style={styleObj}>
         <img src={_.get(props, 'imagesData.imageURL')} />
         <figcaption className="img-title">{_.get(props, 'imagesData.fileName')}</figcaption>
       </figure>
@@ -53,7 +61,14 @@ class AppComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      imagesPos: [] //图片数组位置
+      imgsArrangeArr: [{
+        pos: { //位置
+          left: '',
+          top: ''
+        },
+        rotate: '', //旋转角度
+        isFrontage: true //是否正面
+      }]
     };
   }
 
@@ -64,12 +79,18 @@ class AppComponent extends React.Component {
         controllerUnits = [];
 
   	_.map(imagesData, function (item, index) {
-      if (!_.get(state, ['imagesPos', index])) {
-        _.set(state, ['imagesPos', index], {left:0, top:0});
+      if (!_.get(state, ['imgsArrangeArr', index])) {
+        _.set(state, ['imgsArrangeArr', index], {
+          pos: {
+            left:0,
+            top:0
+          },
+          rotate: 0
+        });
       }
 
   		imgFiguresJSX.push(
-        <ImageFigure key={index} imagesData={item} ref={'imgFigure' + index} pos={_.get(state, ['imagesPos', index])} />
+        <ImageFigure key={index} imagesData={item} ref={'imgFigure' + index} imgsArrangeArr={_.get(state, ['imgsArrangeArr', index])} />
       );
   	}.bind(me));
 
@@ -97,7 +118,7 @@ class AppComponent extends React.Component {
         halfStageH = Math.ceil(stageH / 2);
 
     //单个图片组件大小
-    let imgFigureDOM = me.refs.imgFigure0.figure, //TODO 获取的不是DOM元素
+    let imgFigureDOM = me.refs.imgFigure0.figure,
         imgW = imgFigureDOM.scrollWidth,
         imgH = imgFigureDOM.scrollHeight,
         halfImgW = Math.ceil(imgW / 2),
@@ -128,40 +149,63 @@ class AppComponent extends React.Component {
   }
 
   /*
+   * 旋转随机角度
+   * return 随机输出正负30Deg
+   */
+  rotateRandomDeg () {
+    return (Math.random() > 0.5 ? '-' : '') + Math.ceil(Math.random() * 30);
+  }
+
+  /*
    * 重新布局图片
    * @param centerIndex 居中图片索引
    */
   hanlderLayoutPicture (centerIndex) {
     let me = this,
         state = me.state,
-        imagesPos = _.get(state, 'imagesPos');
+        imgsArrangeArr = _.get(state, 'imgsArrangeArr');
 
-    //重绘居中图片
-    imagesPos.splice(centerIndex, 1);
-
-    //重绘上侧图片
-    if (imagesPos.length > 1) {
-      let topIndex = Math.floor(Math.random() * (imagesPos.length - 1));
-      imagesPos.splice(topIndex, 1);
+    imgsArrangeArr.splice(centerIndex, 1);
+    if (imgsArrangeArr.length > 0) {
+      let topIndex = Math.floor(Math.random() * (imgsArrangeArr.length - 1));
+      imgsArrangeArr.splice(topIndex, 1);
 
       //重绘左,右侧图片
-      if (imagesPos.length) {
-        let l = imagesPos.length;
+      if (imgsArrangeArr.length) {
+        let l = imgsArrangeArr.length;
         for (let i = 0, j = Math.floor(l / 2); i < j, j < l; i++, j++) {
-          imagesPos[i] = {left: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'leftSecX', 0]), _.get(CONSTANT, ['hPosRange', 'leftSecX', 1])), top: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'y', 0]), _.get(CONSTANT, ['hPosRange', 'y', 1]))};
-          imagesPos[j] = {left: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'rightSecX', 0]), _.get(CONSTANT, ['hPosRange', 'rightSecX', 1])), top: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'y', 0]), _.get(CONSTANT, ['hPosRange', 'y', 1]))};
+          imgsArrangeArr[i] = {
+            pos: {
+              left: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'leftSecX', 0]), _.get(CONSTANT, ['hPosRange', 'leftSecX', 1])),
+              top: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'y', 0]), _.get(CONSTANT, ['hPosRange', 'y', 1]))
+            },
+            rotate: me.rotateRandomDeg()
+          };
+          imgsArrangeArr[j] = {
+            pos:{
+              left: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'rightSecX', 0]), _.get(CONSTANT, ['hPosRange', 'rightSecX', 1])),
+              top: me.calcRandomNumber(_.get(CONSTANT, ['hPosRange', 'y', 0]), _.get(CONSTANT, ['hPosRange', 'y', 1]))
+            },
+            rotate: me.rotateRandomDeg()
+          };
         }
       }
 
-      imagesPos.splice(topIndex, 0, {left: me.calcRandomNumber(_.get(CONSTANT, ['vPosRange', 'x', 0]), _.get(CONSTANT, ['vPosRange', 'x', 1])), top: me.calcRandomNumber(_.get(CONSTANT, ['vPosRange', 'topY', 0]), _.get(CONSTANT, ['vPosRange', 'topY', 1]))});
+      imgsArrangeArr.splice(topIndex, 0, {
+        pos: {
+          left: me.calcRandomNumber(_.get(CONSTANT, ['vPosRange', 'x', 0]), _.get(CONSTANT, ['vPosRange', 'x', 1])),
+          top: me.calcRandomNumber(_.get(CONSTANT, ['vPosRange', 'topY', 0]), _.get(CONSTANT, ['vPosRange', 'topY', 1]))
+        },
+        rotate: me.rotateRandomDeg()
+      });
     }
 
-    imagesPos.splice(centerIndex, 0, _.get(CONSTANT, 'centerPos'));
+    imgsArrangeArr.splice(centerIndex, 0, {pos: _.get(CONSTANT, 'centerPos')});
 
     me.setState({
-      imagesPos: imagesPos
+      imgsArrangeArr: imgsArrangeArr
     }, () => {
-      console.log(state, 'imagesPos');
+      console.log(state, 'imgsArrangeArr');
     });
 
   }
