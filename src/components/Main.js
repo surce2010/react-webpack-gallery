@@ -4,6 +4,7 @@ require('styles/main.less');
 
 import React from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 
 let CONSTANT = {
   centerPos: { //中间取值范围
@@ -21,7 +22,7 @@ let CONSTANT = {
   }
 };
 
-// 获取图片相关的数
+// 获取图片相关的数组
 var imagesData = require('../data/imagesData.json');
 // 利用自执行函数， 将图片名信息转成图片URL路径信息
 imagesData = ((imagesDataArr) => {
@@ -35,23 +36,30 @@ imagesData = ((imagesDataArr) => {
 })(imagesData);
 
 class ImageFigure extends React.Component {
+
   render() {
   	let me = this,
         props = me.props,
-        imgsArrangeArr = _.get(props, 'imgsArrangeArr');
+        imgsArrangeArr = _.get(props, 'imgsArrangeArr'),
+        styleObj = {};
 
-    let styleObj = {};
     _.set(styleObj, 'left', _.get(imgsArrangeArr, 'pos.left'));
     _.set(styleObj, 'top', _.get(imgsArrangeArr, 'pos.top'));
 
-    _.map(['Webkit', 'O', 'ms', 'Moz', 'Khtml'], (item) => {
-      return styleObj[item + 'Transform'] = 'rotate(' + (_.get(imgsArrangeArr, 'rotate') || 0) + 'deg)';
+    _.get(imgsArrangeArr, 'rotate') && _.map(['Webkit', 'O', 'ms', 'Moz', 'Khtml'], (item) => {
+      return styleObj[item + 'Transform'] = 'rotate(' + _.get(imgsArrangeArr, 'rotate') + 'deg)';
     });
 
+    _.get(imgsArrangeArr, 'isCenter') && _.set(styleObj, 'zIndex', '101');
+
     return (
-    	<figure className="img-figure" ref={(c) => {this.figure = c}} style={styleObj}>
+    	<figure className={classNames('img-figure', {'is-inverse': _.get(imgsArrangeArr, 'isInverse')})}
+              onClick={me.props.changeCenterIndex}
+              ref={(c) => {this.figure = c}}
+              style={styleObj} >
         <img src={_.get(props, 'imagesData.imageURL')} />
         <figcaption className="img-title">{_.get(props, 'imagesData.fileName')}</figcaption>
+        <div className='text'>{_.get(props, 'imagesData.desc')}</div>
       </figure>
     );
   }
@@ -67,7 +75,8 @@ class AppComponent extends React.Component {
           top: ''
         },
         rotate: '', //旋转角度
-        isFrontage: true //是否正面
+        isInverse: false, //是否正面
+        isCenter: false //是否居中
       }]
     };
   }
@@ -85,12 +94,18 @@ class AppComponent extends React.Component {
             left:0,
             top:0
           },
-          rotate: 0
+          rotate: 0,
+          isInverse: false,
+          isCenter: false
         });
       }
 
   		imgFiguresJSX.push(
-        <ImageFigure key={index} imagesData={item} ref={'imgFigure' + index} imgsArrangeArr={_.get(state, ['imgsArrangeArr', index])} />
+        <ImageFigure key={index}
+                     imagesData={item}
+                     ref={'imgFigure' + index}
+                     changeCenterIndex={me.handleChangeCenterIndex.bind(me, index)}
+                     imgsArrangeArr={_.get(state, ['imgsArrangeArr', index])} />
       );
   	}.bind(me));
 
@@ -137,7 +152,7 @@ class AppComponent extends React.Component {
     _.set(CONSTANT, 'vPosRange.x', [halfStageW - halfImgW, halfStageW]);
     _.set(CONSTANT, 'vPosRange.topY', [-halfImgH, halfStageH - halfImgH * 3]);
 
-    me.hanlderLayoutPicture(5);
+    me.hanlderLayoutPicture(2);
   }
 
   /*
@@ -154,6 +169,15 @@ class AppComponent extends React.Component {
    */
   rotateRandomDeg () {
     return (Math.random() > 0.5 ? '-' : '') + Math.ceil(Math.random() * 30);
+  }
+
+  /*
+   * 切换居中图片
+   * @param 居中图片索引值
+   */
+  handleChangeCenterIndex (index) {
+    let me = this;
+    me.hanlderLayoutPicture(index);
   }
 
   /*
@@ -200,7 +224,10 @@ class AppComponent extends React.Component {
       });
     }
 
-    imgsArrangeArr.splice(centerIndex, 0, {pos: _.get(CONSTANT, 'centerPos')});
+    imgsArrangeArr.splice(centerIndex, 0, {
+      pos: _.get(CONSTANT, 'centerPos'),
+      isCenter: true
+    });
 
     me.setState({
       imgsArrangeArr: imgsArrangeArr
