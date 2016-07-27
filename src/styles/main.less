@@ -36,7 +36,8 @@
   }
 
   &.is-inverse {
-    transform: rotateY(180deg);
+    transform: translate(320px) rotateY(180deg);
+    transform-origin: 0 50% 0;
     .text {
       opacity: 1;
     }
@@ -57,5 +58,6 @@ figcaption {
   height: 100%;
   overflow: hidden;
   background-color: #ddd;
+  //perspective: 1500;
 }
 /* image -- end */

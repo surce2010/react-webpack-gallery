@@ -40,20 +40,22 @@ class ImageFigure extends React.Component {
   render() {
   	let me = this,
         props = me.props,
-        imgsArrangeArr = _.get(props, 'imgsArrangeArr'),
+        imgArrange = _.get(props, 'imgArrange'),
         styleObj = {};
 
-    _.set(styleObj, 'left', _.get(imgsArrangeArr, 'pos.left'));
-    _.set(styleObj, 'top', _.get(imgsArrangeArr, 'pos.top'));
+    _.set(styleObj, 'left', _.get(imgArrange, 'pos.left'));
+    _.set(styleObj, 'top', _.get(imgArrange, 'pos.top'));
 
-    _.get(imgsArrangeArr, 'rotate') && _.map(['Webkit', 'O', 'ms', 'Moz', 'Khtml'], (item) => {
-      return styleObj[item + 'Transform'] = 'rotate(' + _.get(imgsArrangeArr, 'rotate') + 'deg)';
+    _.get(imgArrange, 'rotate') && _.map(['Webkit', 'O', 'ms', 'Moz', 'Khtml'], (item) => {
+      return styleObj[item + 'Transform'] = 'rotate(' + _.get(imgArrange, 'rotate') + 'deg)';
     });
 
-    _.get(imgsArrangeArr, 'isCenter') && _.set(styleObj, 'zIndex', '101');
+    _.get(imgArrange, 'isCenter') && _.set(styleObj, 'zIndex', '101');
+
+    console.log(_.get(imgArrange, 'isInverse'), '反面', _.get(imgArrange, 'isCenter'), '居中');
 
     return (
-    	<figure className={classNames('img-figure', {'is-inverse': _.get(imgsArrangeArr, 'isInverse')})}
+    	<figure className={classNames('img-figure', {'is-inverse': _.get(imgArrange, 'isInverse')})}
               onClick={me.props.changeCenterIndex}
               ref={(c) => {this.figure = c}}
               style={styleObj} >
@@ -105,7 +107,7 @@ class AppComponent extends React.Component {
                      imagesData={item}
                      ref={'imgFigure' + index}
                      changeCenterIndex={me.handleChangeCenterIndex.bind(me, index)}
-                     imgsArrangeArr={_.get(state, ['imgsArrangeArr', index])} />
+                     imgArrange={_.get(state, ['imgsArrangeArr', index])} />
       );
   	}.bind(me));
 
@@ -174,10 +176,29 @@ class AppComponent extends React.Component {
   /*
    * 切换居中图片
    * @param 居中图片索引值
+   * 如果点击的图片不为居中图片,则居中;反之,则翻转;
    */
   handleChangeCenterIndex (index) {
-    let me = this;
-    me.hanlderLayoutPicture(index);
+    let me = this,
+        { state } = me,
+        imgsArrangeArr = _.get(state, 'imgsArrangeArr');
+
+    let centerIndex = _.findIndex(imgsArrangeArr, (item) => {
+      return item.isCenter === true;
+    });
+
+    if (centerIndex === index) {
+      if (_.get(imgsArrangeArr, [index, 'isInverse'])) {
+        _.set(imgsArrangeArr, [index, 'isInverse'], false);
+      } else {
+        _.set(imgsArrangeArr, [index, 'isInverse'], true);
+      }
+      me.setState({
+        imgsArrangeArr: imgsArrangeArr
+      });
+    } else {
+      me.hanlderLayoutPicture(index);
+    }
   }
 
   /*
