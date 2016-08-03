@@ -35,8 +35,8 @@ imagesData = ((imagesDataArr) => {
   return imagesDataArr;
 })(imagesData);
 
+//图片组件
 class ImageFigure extends React.Component {
-
   render() {
   	let me = this,
         props = me.props,
@@ -52,8 +52,6 @@ class ImageFigure extends React.Component {
 
     _.get(imgArrange, 'isCenter') && _.set(styleObj, 'zIndex', '101');
 
-    console.log(_.get(imgArrange, 'isInverse'), '反面', _.get(imgArrange, 'isCenter'), '居中');
-
     return (
     	<figure className={classNames('img-figure', {'is-inverse': _.get(imgArrange, 'isInverse')})}
               onClick={me.props.changeCenterIndex}
@@ -67,6 +65,26 @@ class ImageFigure extends React.Component {
   }
 }
 
+//控制组件
+class ControllerUnit extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+
+    let me = this,
+        props = me.props,
+        imgArrange = _.get(props, 'imgArrange');
+
+    return (
+      <span className={classNames('controller-unit', {'is-center': _.get(imgArrange, 'isCenter')}, {'is-inverse': _.get(imgArrange, 'isInverse')})}
+            onClick={me.props.changeCenterIndex} >
+      </span>
+    );
+  }
+}
+
+//舞台
 class AppComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -103,11 +121,19 @@ class AppComponent extends React.Component {
       }
 
   		imgFiguresJSX.push(
-        <ImageFigure key={index}
+        <ImageFigure key={'imgFigure'+index}
                      imagesData={item}
                      ref={'imgFigure' + index}
                      changeCenterIndex={me.handleChangeCenterIndex.bind(me, index)}
                      imgArrange={_.get(state, ['imgsArrangeArr', index])} />
+      );
+
+      controllerUnits.push(
+        <ControllerUnit key={'controllerUnit'+index}
+                        imagesData={item}
+                        ref={'controllerUnit' + index}
+                        changeCenterIndex={me.handleChangeCenterIndex.bind(me, index)}
+                        imgArrange={_.get(state, ['imgsArrangeArr', index])} />
       );
   	}.bind(me));
 
@@ -157,7 +183,7 @@ class AppComponent extends React.Component {
     me.hanlderLayoutPicture(2);
   }
 
-  /*
+  /**
    * 计算随机数
    * @param low, high取值区间的端点值
    */
@@ -165,7 +191,7 @@ class AppComponent extends React.Component {
     return Math.floor(Math.random() * (high - low) + low);
   }
 
-  /*
+  /**
    * 旋转随机角度
    * return 随机输出正负30Deg
    */
@@ -173,9 +199,9 @@ class AppComponent extends React.Component {
     return (Math.random() > 0.5 ? '-' : '') + Math.ceil(Math.random() * 30);
   }
 
-  /*
+  /**
    * 切换居中图片
-   * @param 居中图片索引值
+   * @param index 居中图片索引值
    * 如果点击的图片不为居中图片,则居中;反之,则翻转;
    */
   handleChangeCenterIndex (index) {
@@ -201,7 +227,7 @@ class AppComponent extends React.Component {
     }
   }
 
-  /*
+  /**
    * 重新布局图片
    * @param centerIndex 居中图片索引
    */

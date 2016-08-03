@@ -1,3 +1,12 @@
+@font-face {
+  font-family: 'iconfont';
+  src: url('//at.alicdn.com/t/font_1469775462_4310834.eot'); /* IE9*/
+  src: url('//at.alicdn.com/t/font_1469775462_4310834.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('//at.alicdn.com/t/font_1469775462_4310834.woff') format('woff'), /* chrome、firefox */
+  url('//at.alicdn.com/t/font_1469775462_4310834.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+  url('//at.alicdn.com/t/font_1469775462_4310834.svg#iconfont') format('svg'); /* iOS 4.1- */
+}
+
 /* stage -- start */
 .stage {
   position: relative;
@@ -17,6 +26,7 @@
   background-color: #fff;
   box-sizing: border-box;
   cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transform: rotateY(0deg);
   transition: .6s ease;
 
@@ -61,3 +71,44 @@ figcaption {
   //perspective: 1500;
 }
 /* image -- end */
+
+.controller-nav {
+  position: relative;
+  z-index: 102;
+  margin-top: -40px;
+  text-align: center;
+}
+
+.controller-unit {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+  border-radius: 50%;
+  background-color: #aaa;
+  cursor: pointer;
+  transform: scale(.5);
+  transition: transform .5s ease-in-out;
+
+  &:hover {
+    transform: scale(1);
+  }
+
+  &.is-center {
+    transform: scale(1);
+  }
+
+  &.is-inverse {
+    transform: rotateY(180deg);
+  }
+
+  &::after {
+    font-family: 'iconfont';
+    content: '\e602';
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    color: #ddd;
+    text-align: center;
+  }
+}
